@@ -28,6 +28,8 @@ class DepartmentResource extends Resource
                 Forms\Components\Section::make()
                     ->schema([
                         Forms\Components\TextInput::make('name')
+                            ->required(),
+                        Forms\Components\TextInput::make('no_hp')
                             ->required()
                     ])
             ]);
