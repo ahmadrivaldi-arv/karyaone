@@ -14,9 +14,9 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
             $table->date('attendance_date');
-            $table->time('check_in')->nullable();
-            $table->time('check_out')->nullable();
-            $table->text('notes')->nullable();
+            $table->time('check_in_time')->nullable();
+            $table->time('check_out_time')->nullable();
+            $table->text('note')->nullable();
             $table->enum('status', ['present', 'absent', 'leave', 'sick'])->default('present');
             $table->enum('timing_status', ['on_time', 'early', 'late'])->nullable(); // opsional, hanya jika status = present
             $table->integer('late_in_min')->nullable();

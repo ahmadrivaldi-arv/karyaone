@@ -13,21 +13,17 @@ return new class extends Migration {
         Schema::create('attendance_recaps', function (Blueprint $table) {
             $table->id();
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
-            $table->unsignedTinyInteger('month');
-            $table->unsignedSmallInteger('year');
-            $table->integer('total_present')->default(0);
-            $table->integer('total_absent')->default(0);
-            $table->integer('total_leave')->default(0);
-            $table->integer('total_sick')->default(0);
-
-            // Potongan dalam bentuk integer (misalnya dalam satuan rupiah)
-            $table->integer('deduction_late')->default(0);
-            $table->integer('deduction_absent')->default(0);
-            $table->integer('total_deduction')->default(0);
-            $table->integer('net_salary')->default(0);
-
+            $table->date('period_start');
+            $table->date('period_end');
+            $table->integer('present_days')->default(0);
+            $table->integer('late_days')->default(0);
+            $table->integer('sick_days')->default(0);
+            $table->integer('leave_days')->default(0);
+            $table->integer('absent_days')->default(0);
+            $table->integer('total_work_days')->default(0);
             $table->timestamps();
-            $table->unique(['employee_id', 'month', 'year']);
+
+            $table->unique(['employee_id', 'period_start', 'period_end'], 'unique_recap_per_period');
         });
     }
 

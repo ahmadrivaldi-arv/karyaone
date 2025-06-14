@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Employee extends Model
 {
+    use HasFactory;
+
     protected $guarded = [
         'id'
     ];
@@ -18,4 +22,18 @@ class Employee extends Model
     {
         return $this->belongsTo(Position::class);
     }
+
+    /**
+     * @return HasMany
+     */
+    public function attendances(): HasMany
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    public function getFormattedPositionAttribute(): string
+    {
+        return "{$this->position->department->name} / {$this->position->name}";
+    }
+
 }

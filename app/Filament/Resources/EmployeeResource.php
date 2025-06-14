@@ -37,8 +37,8 @@ class EmployeeResource extends Resource
                         Forms\Components\TextInput::make('name')->required(),
                         Forms\Components\Select::make('gender')
                             ->options([
-                                'L' => 'Laki-Laki',
-                                'P' => 'Perempuan'
+                                'male' => 'Male',
+                                'female' => 'Female'
                             ])->required()
                             ->native(false),
                         Forms\Components\TextInput::make('phone')->required(),
@@ -50,7 +50,7 @@ class EmployeeResource extends Resource
                 Forms\Components\Section::make('Advanced Information')
                     ->columns(3)
                     ->schema([
-                        Forms\Components\TextInput::make('employee_code')
+                        Forms\Components\TextInput::make('code')
                             ->required()
                             ->label('RFID')
                             ->nullable(),
@@ -69,8 +69,14 @@ class EmployeeResource extends Resource
                             ->required()
                             ->native(false)
                             ->disabled(fn(Get $get) => $get('department_id') === null)
-                            ->options(function (Get $get) {
-                                $departmentId = $get('department_id');
+                            ->options(function (?Employee $record, Get $get, Set $set) {
+
+                                $departmentId = $get('department_id') ?? $record?->position?->department_id;
+
+                                if (filled($record) && blank($get('department_id'))) {
+                                    $set('position_id', $record->position_id);
+                                    $set('department_id', $record->position->department_id);
+                                }
 
                                 if (!$departmentId) {
                                     return [];
@@ -82,11 +88,13 @@ class EmployeeResource extends Resource
                         Forms\Components\DatePicker::make('join_date')
                             ->native(false)
                             ->required(),
-                        Forms\Components\Select::make('Status')
+                        Forms\Components\Select::make('status')
                             ->options([
                                 'active' => 'Active',
                                 'inactive' => 'Inactive'
-                            ])->required()->native(false),
+                            ])
+                            ->required()
+                            ->native(false)
                     ]),
             ]);
     }
@@ -95,20 +103,22 @@ class EmployeeResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name'),
+                Tables\Columns\TextColumn::make('name')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('gender')
+                    ->sortable()
                     ->formatStateUsing(fn($state) => match ($state) {
-                        'L' => 'Male',
-                        'P' => 'Female'
+                        'male' => 'Male',
+                        'female' => 'Female'
                     })
                     ->badge()
                     ->icon(fn($state) => match ($state) {
-                        'L' => 'heroicon-o-user',
-                        'P' => 'heroicon-o-user-minus'
+                        'male' => 'heroicon-o-user',
+                        'female' => 'heroicon-o-user-minus'
                     })
                     ->color(fn($state) => match ($state) {
-                        'L' => 'danger',
-                        'P' => 'info'
+                        'male' => 'danger',
+                        'female' => 'info'
                     }),
                 Tables\Columns\TextColumn::make('department')
                     ->getStateUsing(fn($record) => "{$record->position->department->name} / {$record->position->name}"),

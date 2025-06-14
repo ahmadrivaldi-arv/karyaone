@@ -33,13 +33,34 @@ class AttendanceRecapResource extends Resource
     {
         return $table
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('employee.name')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('period')
+                    ->label('Recap Period')
+                    ->getStateUsing(fn($record) => "{$record->period_start} / {$record->period_end}")
+                    ->icon('heroicon-o-calendar'),
+                Tables\Columns\TextColumn::make('total_work_days')
+                    ->badge()
+                    ->icon('heroicon-o-calendar')
+                    ->color('info')
+                    ->suffix(' days'),
             ])
+            ->recordUrl(null)
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                // Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('view')
+                    ->icon('heroicon-o-eye')
+                    ->label('View')
+                    ->url(fn($record) => route('filament.admin.resources.attendance-recaps.view', $record))
+                    ->color('primary'),
+                Tables\Actions\Action::make('payroll')
+                    ->icon('heroicon-o-document-currency-dollar')
+                    ->label('Create Payroll')
+                    ->url(fn($record) => route('filament.admin.resources.attendance-recaps.view', $record))
+                    ->color('primary')
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -61,6 +82,7 @@ class AttendanceRecapResource extends Resource
             'index' => Pages\ListAttendanceRecaps::route('/'),
             'create' => Pages\CreateAttendanceRecap::route('/create'),
             'edit' => Pages\EditAttendanceRecap::route('/{record}/edit'),
+            'view' => Pages\AttendanceRecapView::route('{record}/view')
         ];
     }
 }
