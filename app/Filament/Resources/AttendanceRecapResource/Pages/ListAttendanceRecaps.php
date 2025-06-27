@@ -17,6 +17,7 @@ class ListAttendanceRecaps extends ListRecords
     {
         return [
             Actions\Action::make('create')
+                ->authorize('create_attendance::recap')
                 ->label('Create Recap')
                 ->modal()
                 ->icon('heroicon-o-folder-plus')

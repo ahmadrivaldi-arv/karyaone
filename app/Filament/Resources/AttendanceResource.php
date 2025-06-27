@@ -32,6 +32,7 @@ class AttendanceResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl('')
             ->columns([
                 Tables\Columns\TextColumn::make('employee.name')
                     ->searchable(),

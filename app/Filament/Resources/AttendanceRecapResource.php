@@ -13,6 +13,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class AttendanceRecapResource extends Resource
 {
@@ -33,6 +34,15 @@ class AttendanceRecapResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function (Builder $query) {
+                /**
+                 * @var \App\Models\User
+                 */
+                $user = Auth::user();
+                if ($user->hasRole('employee')) {
+                    $query->where('employee_id', $user->employee_id);
+                }
+            })
             ->columns([
                 Tables\Columns\TextColumn::make('employee.name')
                     ->searchable(),
@@ -63,6 +73,7 @@ class AttendanceRecapResource extends Resource
                     ->requiresConfirmation()
                     ->modalHeading("Confirm Generate Payroll")
                     ->color('warning')
+                    ->authorize('create_attendance::recap')
                     ->action(function ($record, $livewire) {
                         $payroll = app(PayrollService::class)->generate($record);
 

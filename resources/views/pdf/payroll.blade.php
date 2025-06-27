@@ -96,9 +96,16 @@
             </tr>
             <tr>
                 <td>PERIODE</td>
-                <td>: {{ $payroll->period_start->format('d M Y') }} - {{ $payroll->period_end->format('d M Y') }}
-                </td>
+                <td>: {{ $payroll->period_start->format('d M Y') }} - {{ $payroll->period_end->format('d M Y') }}</td>
             </tr>
+            {{-- <tr>
+                <td>TOTAL HARI KERJA</td>
+                <td>: {{ $payroll->total_work_days ?? '-' }}</td>
+            </tr>
+            <tr>
+                <td>TOTAL MASUK</td>
+                <td>: {{ $payroll->present_days ?? '-' }}</td>
+            </tr> --}}
         </table>
 
         <!-- Payroll Items -->

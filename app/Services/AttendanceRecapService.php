@@ -53,6 +53,7 @@ class AttendanceRecapService
         $periodStart = \Carbon\Carbon::parse($data['period_start']);
         $periodEnd = \Carbon\Carbon::parse($data['period_end']);
         $totalWorkDays = 0;
+
         for ($date = $periodStart->copy(); $date->lte($periodEnd); $date->addDay()) {
             // Assuming work days are Monday to Friday
             if ($date->isWeekday()) {
@@ -61,10 +62,11 @@ class AttendanceRecapService
         }
 
         $present = $attendances->where('status', 'present')->count();
-        $absent = $attendances->where('status', 'absent')->count();
-        $late = $attendances->where('status', 'late')->count();
+        $late = $attendances->where('timing_status', 'late')->count();
         $leave = $attendances->where('status', 'leave')->count();
         $sick = $attendances->where('status', 'sick')->count();
+
+        $absent = $totalWorkDays - $present - $leave - $sick;
 
         // Insert to recap
         AttendanceRecap::create([

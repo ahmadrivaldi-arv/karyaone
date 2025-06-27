@@ -14,11 +14,16 @@ class PayrollService
 
     public function generate(AttendanceRecap $recap): ?Payroll
     {
-        if (Payroll::where('employee_id', $recap->employee_id)
-            ->where('period_start', $recap->period_start)
-            ->where('period_end', $recap->period_end)
-            ->exists()
+        if (
+            Payroll::where('employee_id', $recap->employee_id)
+                ->where('period_start', $recap->period_start)
+                ->where('period_end', $recap->period_end)
+                ->exists()
         ) {
+            Notification::make()
+                ->warning()
+                ->body("Payroll with this period already exists.")
+                ->send();
             return null;
         }
 
@@ -29,34 +34,52 @@ class PayrollService
         $items = [];
 
         $totalAbsent = $recap->absent_days ?? 0;
-        $totalSick   = $recap->sick_days ?? 0;
-        $totalLeave  = $recap->leave_days ?? 0;
+        $totalSick = $recap->sick_days ?? 0;
+        $totalLeave = $recap->leave_days ?? 0;
+        $totalLate = $recap->late_days ?? 0; // Use late_days instead of late_minutes
 
         $deductionFromAbsence = $totalAbsent * 50000;
+        $deductionFromLate = $totalLate * 50000; // Deduct per day, same as absence
+
         $totalDeduction += $deductionFromAbsence;
+        $totalDeduction += $deductionFromLate;
 
         $items[] = [
-            'name'         => "Gaji Pokok",
-            'type'         => "allowance",
-            'amount'       => $baseSalary,
-            'amount_type'  => 'fixed',
-            'is_taxable'   => false,
-            'description'  => null,
-            'created_at'   => now(),
-            'updated_at'   => now(),
+            'name' => "Gaji Pokok",
+            'type' => "allowance",
+            'amount' => $baseSalary,
+            'amount_type' => 'fixed',
+            'is_taxable' => false,
+            'description' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
 
-        $items[] = [
-            'name'         => 'Potongan Keterlambatan',
-            'type'         => 'deduction',
-            'amount'       => $deductionFromAbsence,
-            'amount_type'  => 'fixed',
-            'is_taxable'   => false,
-            'description'  => 'Automatic deduction for total absences',
-            'created_at'   => now(),
-            'updated_at'   => now(),
-        ];
+        if ($totalAbsent) {
+            $items[] = [
+                'name' => "Potongan Tidak Masuk (x$totalAbsent)",
+                'type' => 'deduction',
+                'amount' => $deductionFromAbsence,
+                'amount_type' => 'fixed',
+                'is_taxable' => false,
+                'description' => 'Automatic deduction for total absences',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
 
+        if ($totalLate) {
+            $items[] = [
+                'name' => "Potongan Keterlambatan (x$totalLate)",
+                'type' => 'deduction',
+                'amount' => $deductionFromLate,
+                'amount_type' => 'fixed',
+                'is_taxable' => false,
+                'description' => 'Automatic deduction for late days',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
 
         foreach ($recap->employee->benefits as $benefit) {
             $amount = $benefit->amount_type === 'percentage'
@@ -64,36 +87,38 @@ class PayrollService
                 : round($benefit->amount);
 
             $items[] = [
-                'name'         => $benefit->name,
-                'type'         => $benefit->type,
-                'amount'       => $amount,
-                'amount_type'  => $benefit->amount_type,
-                'is_taxable'   => $benefit->is_taxable,
-                'description'  => $benefit->description,
-                'created_at'   => now(),
-                'updated_at'   => now(),
+                'name' => $benefit->name,
+                'type' => $benefit->type,
+                'amount' => $amount,
+                'amount_type' => $benefit->amount_type,
+                'is_taxable' => $benefit->is_taxable,
+                'description' => $benefit->description,
+                'created_at' => now(),
+                'updated_at' => now(),
             ];
 
-            if ($benefit->type === 'allowance') $totalAllowance += $amount;
-            else $totalDeduction += $amount;
+            if ($benefit->type === 'allowance')
+                $totalAllowance += $amount;
+            else
+                $totalDeduction += $amount;
         }
 
         $totalSalary = $baseSalary + $totalAllowance - $totalDeduction;
 
         $payroll = Payroll::create([
-            'employee_id'     => $employee->id,
-            'period_start'    => $recap->period_start,
-            'period_end'      => $recap->period_end,
-            'base_salary'     => $baseSalary,
+            'employee_id' => $employee->id,
+            'period_start' => $recap->period_start,
+            'period_end' => $recap->period_end,
+            'base_salary' => $baseSalary,
             'total_allowance' => $totalAllowance,
             'total_deduction' => $totalDeduction,
-            'total_salary'    => $totalSalary,
-            'status'          => 'pending',
-            'total_absent'    => $totalAbsent,
-            'total_sick'      => $totalSick,
-            'total_leave'     => $totalLeave,
+            'total_salary' => $totalSalary,
+            'status' => 'pending',
+            'total_absent' => $totalAbsent,
+            'total_sick' => $totalSick,
+            'total_leave' => $totalLeave,
+            'total_late' => $totalLate,
         ]);
-
 
         foreach ($items as &$item) {
             $item['payroll_id'] = $payroll->id;

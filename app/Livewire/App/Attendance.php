@@ -52,18 +52,32 @@ class Attendance extends Component
 
         if ($this->attendance = $employee->attendances()->today()->first()) {
 
-
-            if (now()->format('H:i') < '00:30') {
+            // If already checked out, show message
+            if ($this->attendance->check_out_time) {
                 Notification::make()
-                    ->info()
-                    ->title('Info')
-                    ->body('Checkout is only allowed after 17:30.')
+                    ->warning()
+                    ->title('Already Checked Out')
+                    ->body('You have already checked out today at ' . $this->attendance->check_out_time . '.')
+                    ->send();
+                return;
+            }
+
+            // Allow checkout at 17:30 or later
+            if (now()->format('H:i') >= '17:30') {
+                // Perform checkout logic here
+                $this->attendance->update([
+                    'check_out_time' => now(),
+                ]);
+                Notification::make()
+                    ->success()
+                    ->title('Success')
+                    ->body("You have successfully checked out at " . now()->format('H:i') . ".")
                     ->send();
             } else {
                 Notification::make()
                     ->warning()
                     ->title('Warning')
-                    ->body("You have already checked in today at {$this->attendance->check_in_time}.")
+                    ->body('Checkout is only allowed at or after 17:30.')
                     ->send();
             }
 
@@ -71,11 +85,21 @@ class Attendance extends Component
         }
 
         $checkInTime = now();
-        $officeStart = now()->setTime(22, 0, 0);
+        $officeStart = now()->setTime(9, 0, 0);
         $lateInMin = 0;
 
         if ($checkInTime->greaterThan($officeStart)) {
             $lateInMin = $checkInTime->diffInMinutes($officeStart);
+        }
+
+        // Prevent check-in before 06:30
+        if ($checkInTime->format('H:i') < '06:30') {
+            Notification::make()
+                ->warning()
+                ->title('Too Early')
+                ->body('Check-in is not allowed before 06:30.')
+                ->send();
+            return;
         }
 
         $this->attendance = $employee->attendances()->create([
@@ -89,7 +113,7 @@ class Attendance extends Component
         Notification::make()
             ->success()
             ->title('Warning')
-            ->body("You have successfully checked in at {$this->attendance->check_in}.")
+            ->body("You have successfully checked in at {$this->attendance->check_in_time}.")
             ->send();
 
         session()->flash('success', "Welcome <strong>{$employee->name}</strong>! Wishing you a productive and successful workday ahead.");

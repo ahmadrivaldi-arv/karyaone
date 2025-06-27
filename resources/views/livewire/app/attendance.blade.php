@@ -69,13 +69,25 @@
                                             <x-heroicon-o-star class="w-4 h-4 inline m-0" />
                                             On Time
                                         </span>
+                                    @elseif ($attendance->isEarly())
+                                        <span
+                                            class="bg-blue-100 text-blue-800 py-1 px-2 rounded-full border-blue-500 border font-medium text-xs inline-flex items-center gap-1">
+                                            <x-heroicon-o-arrow-up-circle class="w-4 h-4 inline m-0" />
+                                            Early
+                                        </span>
+                                    @elseif ($attendance->isLate())
+                                        <span
+                                            class="bg-red-100 text-red-800 py-1 px-2 rounded-full border-red-500 border font-medium text-xs inline-flex items-center gap-1">
+                                            <x-heroicon-o-clock class="w-4 h-4 inline m-0" />
+                                            Late
+                                        </span>
                                     @endif
                                 </span>
                             </div>
                         </div>
                     @endif
                 </div>
-                <div class="mt-2 flex gap-2 inline-flex" x-data="{ manualMode: false }">
+                {{-- <div class="mt-2 flex gap-2 inline-flex" x-data="{ manualMode: false }">
                     <input id="manualId" x-bind:disabled="!manualMode" type="number"
                         class="disabled:bg-gray-100 disabled:cursor-not-allowed border max-w-[15rem] border-gray-200 px-4 py-2 rounded-lg text-xs sm:text-sm w-full"
                         placeholder="Enter your ID">
@@ -95,7 +107,7 @@
                         <x-heroicon-o-paper-airplane class="w-4 h-4 inline" />
                         Submit Attendance
                     </button>
-                </div>
+                </div> --}}
             </div>
         </div>
         <div class="lg:col-span-4 col-span-12 flex items-center justify-center w-full h-[50rem]">
