@@ -33,13 +33,25 @@ class PayrollResource extends Resource
     {
         return $table
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('employee.name')
+                    ->label('Employee'),
+                Tables\Columns\TextColumn::make('period')
+                    ->label('Period')
+                    ->getStateUsing(fn($record) => "$record->period_start / $record->period_end"),
+                Tables\Columns\TextColumn::make('total_salary')
+                    ->money('idr')
+                    ->label('Total Salary'),
+                Tables\Columns\TextColumn::make('status')
+                    ->badge(),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('pdf')
+                    ->label('Download Pdf')
+                    ->icon('heroicon-o-document-text')
+                    ->url(fn($record) => route('payroll.pdf', $record), true),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

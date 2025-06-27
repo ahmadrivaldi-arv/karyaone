@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\AttendanceRecapResource\Pages;
 use App\Filament\Resources\AttendanceRecapResource\RelationManagers;
 use App\Models\AttendanceRecap;
+use App\Services\PayrollService;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -59,8 +60,16 @@ class AttendanceRecapResource extends Resource
                 Tables\Actions\Action::make('payroll')
                     ->icon('heroicon-o-document-currency-dollar')
                     ->label('Create Payroll')
-                    ->url(fn($record) => route('filament.admin.resources.attendance-recaps.view', $record))
-                    ->color('primary')
+                    ->requiresConfirmation()
+                    ->modalHeading("Confirm Generate Payroll")
+                    ->color('warning')
+                    ->action(function ($record, $livewire) {
+                        $payroll = app(PayrollService::class)->generate($record);
+
+                        if ($payroll) {
+                            $livewire->redirect(route('filament.admin.resources.payrolls.index'));
+                        }
+                    })
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

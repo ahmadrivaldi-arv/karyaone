@@ -23,6 +23,7 @@ class EmployeeResource extends Resource
     protected static ?string $model = Employee::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
+
     protected static ?string $navigationGroup = 'Master Data';
 
     public static function form(Form $form): Form
@@ -88,6 +89,9 @@ class EmployeeResource extends Resource
                         Forms\Components\DatePicker::make('join_date')
                             ->native(false)
                             ->required(),
+                        Forms\Components\TextInput::make('base_salary')
+                            ->numeric()
+                            ->required(),
                         Forms\Components\Select::make('status')
                             ->options([
                                 'active' => 'Active',
@@ -102,6 +106,7 @@ class EmployeeResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(fn($record) => route('filament.admin.resources.employees.view', $record))
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
@@ -151,6 +156,7 @@ class EmployeeResource extends Resource
             'index' => Pages\ListEmployees::route('/'),
             'create' => Pages\CreateEmployee::route('/create'),
             'edit' => Pages\EditEmployee::route('/{record}/edit'),
+            'view' => Pages\Employee\ViewEmployee::route('/{record}/view')
         ];
     }
 }

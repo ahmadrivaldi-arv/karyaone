@@ -31,6 +31,14 @@ class Employee extends Model
         return $this->hasMany(Attendance::class);
     }
 
+    /**
+     * @return HasMany
+     */
+    public function benefits(): HasMany
+    {
+        return $this->hasMany(EmployeeBenefit::class);
+    }
+
     public function getFormattedPositionAttribute(): string
     {
         return "{$this->position->department->name} / {$this->position->name}";
