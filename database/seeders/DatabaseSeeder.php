@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Employee;
 use App\Models\Position;
 use App\Models\User;
+
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -24,8 +25,9 @@ class DatabaseSeeder extends Seeder
         $positions = Position::pluck('id')->toArray();
 
         User::firstOrCreate([
-            'name' => 'Super Admin',
             'email' => 'superadmin@admin.com',
+        ], [
+            'name' => 'Super Admin',
             'password' => bcrypt('admin')
         ]);
 
