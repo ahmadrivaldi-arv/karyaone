@@ -34,7 +34,7 @@ class EmployeeResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Section::make('Basic Information')
-                    ->columns(4)
+                    ->columns(2)
                     ->schema([
                         Forms\Components\TextInput::make('name')->required(),
                         Forms\Components\Select::make('gender')
@@ -43,6 +43,8 @@ class EmployeeResource extends Resource
                                 'female' => 'Female'
                             ])->required()
                             ->native(false),
+                        Forms\Components\TextInput::make('place_of_birth')->required(),
+                        Forms\Components\DatePicker::make('date_of_birth')->native(false)->required(),
                         Forms\Components\TextInput::make('phone')->required(),
                         Forms\Components\TextInput::make('email')->required(),
                         Forms\Components\Textarea::make('address')
@@ -132,6 +134,9 @@ class EmployeeResource extends Resource
                     ->getStateUsing(fn($record) => "{$record->position->department->name} / {$record->position->name}"),
                 Tables\Columns\TextColumn::make('contact')
                     ->getStateUsing(fn($record) => "{$record->email} / {$record->phone}"),
+                Tables\Columns\TextColumn::make('date_of_birth')
+                    ->date()
+                    ->sortable(),
             ])
             ->filters([
                 //

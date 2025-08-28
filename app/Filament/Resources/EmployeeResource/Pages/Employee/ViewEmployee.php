@@ -54,6 +54,8 @@ class ViewEmployee extends Page implements HasForms, HasInfolists, HasTable, Has
                 ])
                 ->schema([
                     Infolists\Components\TextEntry::make('name'),
+                    Infolists\Components\TextEntry::make('place_of_birth'),
+                    Infolists\Components\TextEntry::make('date_of_birth')->date(),
                     Infolists\Components\TextEntry::make('contact')
                         ->getStateUsing(fn($record) => "$record->email / $record->phone"),
                     Infolists\Components\TextEntry::make('gender')

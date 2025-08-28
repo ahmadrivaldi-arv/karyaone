@@ -5,7 +5,7 @@ use App\Livewire\App\Attendance;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return redirect()->route('filament.admin.auth.login');
+    return view('welcome');
 });
 
 Route::get('attendance', Attendance::class)->name('attendance');
