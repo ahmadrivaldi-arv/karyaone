@@ -35,11 +35,13 @@ class AttendanceRecapResource extends Resource
     {
         return $table
             ->modifyQueryUsing(function (Builder $query) {
+
                 /**
                  * @var \App\Models\User
                  */
                 $user = Auth::user();
-                if ($user->hasRole('employee')) {
+
+                if ($user->isEmployee()) {
                     $query->where('employee_id', $user->employee_id);
                 }
             })

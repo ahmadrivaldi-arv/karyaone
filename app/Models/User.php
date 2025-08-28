@@ -58,4 +58,20 @@ class User extends Authenticatable
         return $this->belongsTo(Employee::class);
     }
 
+    /**
+     * @return bool
+     */
+    public function isEmployee(): bool
+    {
+        return $this->hasRole('Employee');
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->hasRole(['Super Admin', 'super_admin']);
+    }
+
 }

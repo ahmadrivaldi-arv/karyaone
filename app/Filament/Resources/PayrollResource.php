@@ -39,7 +39,8 @@ class PayrollResource extends Resource
                  * @var \App\Models\User
                  */
                 $user = Auth::user();
-                if ($user->hasRole('employee')) {
+
+                if ($user->isEmployee()) {
                     $query->where('employee_id', $user->employee_id);
                 }
             })
@@ -52,8 +53,8 @@ class PayrollResource extends Resource
                 Tables\Columns\TextColumn::make('total_salary')
                     ->money('idr')
                     ->label('Total Salary'),
-                Tables\Columns\TextColumn::make('status')
-                    ->badge(),
+                // Tables\Columns\TextColumn::make('status')
+                //     ->badge(),
             ])
             ->filters([
                 //

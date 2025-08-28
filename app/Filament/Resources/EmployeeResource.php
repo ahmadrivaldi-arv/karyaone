@@ -13,6 +13,7 @@ use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Resources\Resource;
+use Filament\Support\RawJs;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -90,7 +91,9 @@ class EmployeeResource extends Resource
                             ->native(false)
                             ->required(),
                         Forms\Components\TextInput::make('base_salary')
-                            ->numeric()
+                            ->mask(RawJs::make(<<<'JS'
+                                            $money($input, '.', ',', 2)
+                                            JS))
                             ->required(),
                         Forms\Components\Select::make('status')
                             ->options([

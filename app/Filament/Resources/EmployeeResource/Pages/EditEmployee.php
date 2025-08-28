@@ -16,4 +16,16 @@ class EditEmployee extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+    /**
+     * @param array $data
+     *
+     * @return array
+     */
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $data['base_salary'] = str($data['base_salary'])->numbers()->toString();
+
+        return $data;
+    }
 }
